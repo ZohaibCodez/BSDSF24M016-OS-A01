@@ -224,3 +224,18 @@ This shows that the dynamic loader is responsible for finding the shared librari
 program needs, loading them into the process's memory (at a randomized address), and
 resolving the addresses of the functions the program uses, all before `main()` starts.
 If it cannot find a required library, the program cannot start at all.
+
+## Feature 5: Man Pages and Installation
+
+Man pages were written in groff format for every library function in section 3
+(`man/man3/*.3`), and for the client program in section 1 (`man/man1/client.1`).
+Section 3 is used for library functions and section 1 for user commands.
+Each page contains the NAME, SYNOPSIS, DESCRIPTION and AUTHOR sections, and most
+also include RETURN VALUE, NOTES and SEE ALSO.
+
+The top-level Makefile has an `install` target that copies `client_static` to
+`/usr/local/bin/client` (permissions 755) and the man pages to
+`/usr/local/share/man` (permissions 644), then updates the man database with
+`mandb`. Because `/usr/local/bin` is in the `PATH` variable, the program can be run
+from any directory by typing `client`, and its documentation can be viewed with
+`man client` or `man mystrlen`. An `uninstall` target removes the installed files.
