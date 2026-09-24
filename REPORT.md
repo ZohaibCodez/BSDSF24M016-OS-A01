@@ -134,3 +134,93 @@ As a result, `client_static` does not need `libmyutils.a` to run. This is confir
 `ldd bin/client_static`, which does not list `libmyutils` at all. Only the standard C
 library (`libc.so.6`) is still linked dynamically, because gcc links the C library
 dynamically by default.
+
+## Feature 4: Creating and Using a Dynamic Library
+
+### Q1. What is Position-Independent Code (-fPIC) and why is it a fundamental requirement for creating shared libraries?
+
+Position-Independent Code (PIC) is machine code that runs correctly no matter at which
+memory address it is loaded. The `-fPIC` flag tells gcc to generate such code.
+
+A shared library can be loaded at a different address in every process that uses it.
+I observed this directly: in two runs of `ldd bin/client_dynamic`, `libmyutils.so` was
+loaded at `0x725fc0bb6000` and then at `0x7807766fa000`. Linux randomizes these
+addresses on every run (Address Space Layout Randomization, ASLR).
+
+If the library contained fixed (absolute) addresses, the dynamic loader would have to
+modify the code for each process, so every process would need its own modified copy,
+and the code could not be shared in memory. With PIC, the code uses addresses relative
+to the current instruction, and calls to external functions and accesses to global data
+go through a table called the Global Offset Table (GOT). At run time, the loader only
+fills in this table, and the code itself is never changed. Because of this, one copy
+of the library's code in RAM can be shared by many processes at the same time, which
+is the main purpose of a shared library.
+
+I also tried building the shared library from object files compiled without `-fPIC`,
+and on my system (Ubuntu) it still linked. This is because modern Ubuntu gcc generates
+position-independent code by default (it builds PIE executables). On systems where
+this is not the default, the linker refuses and asks to "recompile with -fPIC".
+Therefore `-fPIC` is still used explicitly, so the build is correct on any system.
+
+In my Makefile, only the library object files are compiled with `-fPIC`, using the
+target-specific variable `$(LIB_OBJS): CFLAGS += $(PICFLAGS)`. `main.o` does not need it.
+
+### Q2. Explain the difference in file size between your static and dynamic clients. Why does this difference exist?
+
+Output of `ls -lh bin/` and `size`:
+
+| File | Size on disk | text (code) section |
+|---|---|---|
+| `client_static` | 24K | 5868 bytes |
+| `client_dynamic` | 20K | 4231 bytes |
+
+`client_static` is larger because at build time the linker copied the machine code of
+`mystrlen`, `mystrcpy`, `mystrncpy`, `mystrcat`, `wordCount` and `mygrep` from
+`libmyutils.a` into the executable. `nm` shows these functions as `T` (defined) in
+`client_static`. `client_dynamic` does not contain this code: `nm` shows them as `U`
+(undefined), and the code exists only in `libmyutils.so`. The `size` command confirms
+this: the text (code) section of `client_static` is 1637 bytes larger.
+
+In my project the difference is small for two reasons: my library is very small, and
+the standard C library (`libc`) is linked dynamically in both clients by default
+(`ldd` lists `libc.so.6` for both). To see the full effect, I linked the program
+completely statically:
+
+    gcc -static obj/main.o lib/libmyutils.a -o /tmp/client_full_static
+
+This executable was **818K**, and `ldd` reported "not a dynamic executable", because
+the whole C library was copied into it. This shows that in real programs static linking
+can make executables much larger, while dynamic linking keeps them small and lets many
+programs share one copy of a library in memory.
+
+### Q3. What is LD_LIBRARY_PATH? Why was it necessary to set it, and what does this tell you about the responsibilities of the dynamic loader?
+
+`LD_LIBRARY_PATH` is an environment variable that contains a list of directories
+(separated by `:`) where the dynamic loader searches for shared libraries before the
+default system locations.
+
+When I first ran `./bin/client_dynamic`, it failed with:
+
+    error while loading shared libraries: libmyutils.so: cannot open shared object file: No such file or directory
+
+and `ldd bin/client_dynamic` showed `libmyutils.so => not found`. The `-L` flag was
+only used by the linker at build time. At run time, a different program, the dynamic
+loader (`/lib64/ld-linux-x86-64.so.2`), must find the library. It searches only
+specific places: paths stored inside the executable (RPATH/RUNPATH), directories in
+`LD_LIBRARY_PATH`, the system library cache (`/etc/ld.so.cache`), and default
+directories such as `/lib` and `/usr/lib`. My project's `lib` directory was in none of
+these.
+
+After running `export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH`, the program ran
+correctly, and `ldd` showed:
+
+    libmyutils.so => /home/dev_zohaib/UNI/5th-Semester/OS/ASSIGNMENTS/BSDSF24M016-OS-A01/lib/libmyutils.so
+
+This setting is temporary and applies only to the current terminal session. My
+top-level Makefile also has a `run-dynamic` target that sets the variable for a single
+command: `LD_LIBRARY_PATH=$(LIB_DIR) ./bin/client_dynamic`.
+
+This shows that the dynamic loader is responsible for finding the shared libraries a
+program needs, loading them into the process's memory (at a randomized address), and
+resolving the addresses of the functions the program uses, all before `main()` starts.
+If it cannot find a required library, the program cannot start at all.
