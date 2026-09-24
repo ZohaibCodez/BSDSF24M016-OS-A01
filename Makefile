@@ -11,4 +11,4 @@ clean:
 	$(MAKE) -C $(SRC_DIR) clean
 
 run: all
-	./bin/client
+	./bin/client_static
