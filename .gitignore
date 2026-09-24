@@ -1,0 +1,5 @@
+obj/*.o
+bin/*
+!bin/.gitkeep
+lib/*.a
+lib/*.so
