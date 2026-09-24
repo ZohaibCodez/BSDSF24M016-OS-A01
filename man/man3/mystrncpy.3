@@ -1,0 +1,55 @@
+.\" Man page for mystrncpy
+.TH MYSTRNCPY 3 "2026-09-24" "libmyutils 0.4.1" "libmyutils Manual"
+.SH NAME
+mystrncpy \- copy at most n characters of a string
+.SH SYNOPSIS
+.nf
+.B #include \(dqmystrfunctions.h\(dq
+.PP
+.BI "int mystrncpy(char *" dest ", const char *" src ", int " n );
+.fi
+.SH DESCRIPTION
+The
+.B mystrncpy()
+function copies at most
+.I n
+characters from the string pointed to by
+.I src
+into the buffer pointed to by
+.IR dest .
+If
+.I src
+is shorter than
+.I n
+characters, the remaining bytes of
+.I dest
+up to
+.I n
+are filled with null bytes.
+.SH RETURN VALUE
+Returns the number of characters copied from
+.IR src ,
+not counting any padding null bytes.
+Returns \-1 if
+.I dest
+or
+.I src
+is NULL, or if
+.I n
+is negative.
+.SH NOTES
+If
+.I src
+contains
+.I n
+or more characters,
+.I dest
+is
+.B not
+null-terminated. The caller must add the null byte manually, for example
+.IR dest [ n "] = \(aq\e0\(aq."
+.SH SEE ALSO
+.BR mystrcpy (3),
+.BR mystrlen (3)
+.SH AUTHOR
+Muhammad Zohaib Khan <REAL_EMAIL_HERE>

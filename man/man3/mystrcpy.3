@@ -1,0 +1,36 @@
+.\" Man page for mystrcpy
+.TH MYSTRCPY 3 "2026-09-24" "libmyutils 0.4.1" "libmyutils Manual"
+.SH NAME
+mystrcpy \- copy a string
+.SH SYNOPSIS
+.nf
+.B #include \(dqmystrfunctions.h\(dq
+.PP
+.BI "int mystrcpy(char *" dest ", const char *" src );
+.fi
+.SH DESCRIPTION
+The
+.B mystrcpy()
+function copies the string pointed to by
+.IR src ,
+including the terminating null byte (\(aq\e0\(aq), into the buffer pointed to by
+.IR dest .
+.SH RETURN VALUE
+Returns the number of characters copied, not counting the terminating null byte.
+Returns \-1 if
+.I dest
+or
+.I src
+is NULL.
+.SH NOTES
+The buffer
+.I dest
+must be large enough to hold
+.I src
+and its null byte. If it is not, the function writes past the end of the
+buffer (buffer overflow).
+.SH SEE ALSO
+.BR mystrncpy (3),
+.BR mystrlen (3)
+.SH AUTHOR
+Muhammad Zohaib Khan <REAL_EMAIL_HERE>

@@ -1,0 +1,47 @@
+.\" Man page for mygrep
+.TH MYGREP 3 "2026-09-24" "libmyutils 0.4.1" "libmyutils Manual"
+.SH NAME
+mygrep \- find lines in a file that contain a string
+.SH SYNOPSIS
+.nf
+.B #include <stdio.h>
+.B #include \(dqmyfilefunctions.h\(dq
+.PP
+.BI "int mygrep(FILE *" fp ", const char *" search_str ", char ***" matches );
+.fi
+.SH DESCRIPTION
+The
+.B mygrep()
+function reads the file stream
+.I fp
+line by line and collects every line that contains the string
+.IR search_str .
+.PP
+The matching lines are copied into newly allocated memory, and a newly
+allocated array of pointers to them is stored in
+.IR *matches .
+The file is read from its current position until end of file.
+.SH RETURN VALUE
+On success, returns the number of matching lines (0 if none).
+Returns \-1 if any argument is NULL or if memory allocation fails.
+.SH NOTES
+The caller is responsible for freeing each string in
+.I *matches
+and then the array itself with
+.BR free (3).
+Lines longer than 1023 characters are read in parts.
+.SH EXAMPLE
+.nf
+char **matches = NULL;
+int n = mygrep(fp, "systems", &matches);
+for (int i = 0; i < n; i++) {
+    printf("%s", matches[i]);
+    free(matches[i]);
+}
+free(matches);
+.fi
+.SH SEE ALSO
+.BR wordCount (3),
+.BR strstr (3)
+.SH AUTHOR
+Muhammad Zohaib Khan <itxlevicodez@gmail.com>

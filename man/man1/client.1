@@ -1,0 +1,31 @@
+.\" Man page for the client program
+.TH CLIENT 1 "2026-09-24" "libmyutils 0.4.1" "User Commands"
+.SH NAME
+client \- test driver for the libmyutils library
+.SH SYNOPSIS
+.B client
+.SH DESCRIPTION
+.B client
+tests every function of the libmyutils library and prints each result
+next to its expected value.
+.PP
+It first tests the string functions
+.BR mystrlen (3),
+.BR mystrcpy (3),
+.BR mystrncpy (3)
+and
+.BR mystrcat (3).
+It then creates a temporary file named
+.I test_input.txt
+in the current directory, tests
+.BR wordCount (3)
+and
+.BR mygrep (3)
+on it, and deletes it.
+.SH EXIT STATUS
+Returns 0 on success, and 1 if the test file cannot be created or opened.
+.SH SEE ALSO
+.BR mystrlen (3),
+.BR mygrep (3)
+.SH AUTHOR
+Muhammad Zohaib Khan <itxlevicodez@gmail.com>

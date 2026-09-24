@@ -1,0 +1,38 @@
+.\" Man page for mystrcat
+.TH MYSTRCAT 3 "2026-09-24" "libmyutils 0.4.1" "libmyutils Manual"
+.SH NAME
+mystrcat \- append a string to another string
+.SH SYNOPSIS
+.nf
+.B #include \(dqmystrfunctions.h\(dq
+.PP
+.BI "int mystrcat(char *" dest ", const char *" src );
+.fi
+.SH DESCRIPTION
+The
+.B mystrcat()
+function appends the string pointed to by
+.I src
+to the end of the string pointed to by
+.IR dest .
+It overwrites the terminating null byte of
+.I dest
+and then adds a new terminating null byte at the end.
+.SH RETURN VALUE
+Returns the new length of
+.IR dest ,
+not counting the terminating null byte.
+Returns \-1 if
+.I dest
+or
+.I src
+is NULL.
+.SH NOTES
+The buffer
+.I dest
+must be large enough to hold both strings and the null byte.
+.SH SEE ALSO
+.BR mystrcpy (3),
+.BR mystrlen (3)
+.SH AUTHOR
+Muhammad Zohaib Khan <REAL_EMAIL_HERE>

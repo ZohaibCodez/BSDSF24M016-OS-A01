@@ -1,0 +1,39 @@
+.\" Man page for wordCount
+.TH WORDCOUNT 3 "2026-09-24" "libmyutils 0.4.1" "libmyutils Manual"
+.SH NAME
+wordCount \- count lines, words and characters in a file
+.SH SYNOPSIS
+.nf
+.B #include <stdio.h>
+.B #include \(dqmyfilefunctions.h\(dq
+.PP
+.BI "int wordCount(FILE *" file ", int *" lines ", int *" words ", int *" chars );
+.fi
+.SH DESCRIPTION
+The
+.B wordCount()
+function reads the file stream
+.I file
+from its current position until end of file, and counts its lines, words
+and characters. The results are stored in the integers pointed to by
+.IR lines ,
+.I words
+and
+.IR chars .
+.PP
+Lines are counted as the number of newline characters. A word is a sequence
+of characters separated by whitespace. Every byte read is counted as a
+character. This matches the behaviour of
+.BR wc (1).
+.SH RETURN VALUE
+Returns 0 on success.
+Returns \-1 if any argument is NULL.
+.SH NOTES
+After this function returns, the file position is at end of file. Call
+.BR rewind (3)
+before reading the file again.
+.SH SEE ALSO
+.BR mygrep (3),
+.BR wc (1)
+.SH AUTHOR
+Muhammad Zohaib Khan <REAL_EMAIL_HERE>
